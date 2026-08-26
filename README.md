@@ -79,6 +79,18 @@ data/               fuentes, verificación y series propias
 scripts/            descarga reproducible de XM
 ```
 
+## El agua tiene su propia frontera
+
+El WUE se define sobre el kWh del **equipo informático**, no sobre el del medidor
+(LBNL, pág. 39). Aplicarlo al medidor sobreestima el agua en un factor igual al
+PUE. El tablero usa el denominador correcto.
+
+Y hay una segunda frontera, más grande: el agua **indirecta**, la que se consume
+generando la electricidad. En Estados Unidos son 4,52 L/kWh contra 0,36 de agua
+directa — **unas doce veces más**. No existe factor equivalente verificado para
+la red colombiana, así que el tablero calcula la directa y declara que la
+indirecta, probablemente mayor, no la puede contar.
+
 ## Frontera declarada
 
 El tablero cuenta el edificio: equipo informático, refrigeración y distribución

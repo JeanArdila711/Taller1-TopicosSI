@@ -5,7 +5,7 @@ import { TITULO, SUBTITULO, INTEGRANTES, CURSO } from "./site";
 import { Perilla, Segmentado, Cifra, Hueco, Bandera } from "@/components/Controles";
 import {
   CALIBRACION, SITIO, REDUNDANCIA, FRONTERA, PRESET_UTIL, ESCENARIO, CONSULTA,
-  CRECIMIENTO_HISTORICO, VARA, FUENTE,
+  CRECIMIENTO_HISTORICO, VARA, FUENTE, WUE_ANCLA, AGUA_VARA, AGUA_INDIRECTA_EEUU,
   type CalibId, type SitioId, type RedundanciaId, type FronteraId,
   type EscenarioId, type ConsultaId, type VaraId,
 } from "@/lib/datos";
@@ -24,6 +24,7 @@ export default function Home() {
   const [redundancia, setRed] = useState<RedundanciaId>("N");
   const [frontera, setFrontera] = useState<FronteraId>("edificio");
   const [calibracion, setCalib] = useState<CalibId>("medido");
+  const [wue, setWue] = useState(0.5);
 
   /* ── Mitad A ── */
   const [escenario, setEsc] = useState<EscenarioId>("base");
@@ -38,8 +39,8 @@ export default function Home() {
   const [vara, setVara] = useState<VaraId>("colombias");
 
   const b = useMemo(
-    () => modelarEdificio({ placaMW, pue, utilPct, sitio, redundancia, frontera, calibracion }),
-    [placaMW, pue, utilPct, sitio, redundancia, frontera, calibracion],
+    () => modelarEdificio({ placaMW, pue, utilPct, sitio, redundancia, frontera, calibracion, wue }),
+    [placaMW, pue, utilPct, sitio, redundancia, frontera, calibracion, wue],
   );
   const a = useMemo(
     () => modelarProspectiva({
@@ -119,6 +120,14 @@ export default function Home() {
               fuente="LBNL 2024, pág. 47 · EE. UU. Proyecta entre 1,15 y 1,35 para 2028."
             />
 
+            <Perilla
+              etiqueta="WUE · agua por kWh de equipo" acento="amarillo"
+              valor={wue} min={0.05} max={2} paso={0.01} onChange={setWue}
+              formato={(v) => `${n2.format(v)} L/kWh`}
+              anclas={WUE_ANCLA.map((w) => ({ v: w.v, et: w.et }))}
+              fuente="El WUE se define sobre el kWh del EQUIPO, no del medidor (LBNL pág. 39). Dividir por el medidor sobreestima el agua en un factor igual al PUE."
+            />
+
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <Bandera activa={sitio === "medellin"} />
@@ -163,7 +172,11 @@ export default function Home() {
               <Cifra valor={`${n2.format(b.pctDemandaPais)} %`} unidad="de la demanda eléctrica del país" />
               <Cifra valor={n0.format(b.tCO2e)} unidad={`tCO₂e al año en ${s.et}`} acento={sitio === "medellin" ? "amarillo" : "ink"} />
               <Cifra valor={`${n1.format(b.pctMargenFirme)} %`} unidad="del margen de energía firme del SIN" derivado />
+              <Cifra valor={n0.format(b.aguaM3)} unidad="m³ de agua al año (directa)" acento="amarillo" />
+              <Cifra valor={n0.format(b.aguaHogares)} unidad={`hogares al consumo básico CRA · ${AGUA_VARA.et}`} />
             </div>
+
+            <Hueco texto={AGUA_INDIRECTA_EEUU.hueco} />
 
             <p className="border-t border-linea pt-4 text-[13.5px] leading-relaxed text-ink-2">
               <strong className="font-semibold text-ink">{n0.format(placaMW)} MW</strong> de placa a PUE{" "}
@@ -174,6 +187,10 @@ export default function Home() {
               <strong className="font-semibold text-ink">{n1.format(t.valor)} {t.unidad}</strong>, y lo que necesitarían{" "}
               <strong className="font-semibold text-ink">{n0.format(b.hogares)} hogares</strong> para vivir un año.
               Son <strong className="font-semibold text-ink">{n0.format(b.racks)} racks</strong> de IA de 120 kW.
+              De agua directa se lleva{" "}
+              <strong className="font-semibold text-ink">{n0.format(b.aguaM3)} m³ al año</strong>, lo que
+              consumirían <strong className="font-semibold text-ink">{n0.format(b.aguaHogares)} hogares</strong>{" "}
+              al mínimo que la CRA define como suficiente.
             </p>
 
             {/* redundancia */}

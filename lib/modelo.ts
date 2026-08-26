@@ -3,7 +3,7 @@
 
 import {
   FUENTE, MARGEN_FIRME_GWh, CALIBRACION, SITIO, REDUNDANCIA, FRONTERA,
-  ANCLAS, ANCLAS_IT, ESCENARIO, CONSULTA,
+  ANCLAS, ANCLAS_IT, ESCENARIO, CONSULTA, AGUA_VARA, AGUA_INDIRECTA_EEUU,
   type CalibId, type SitioId, type RedundanciaId, type FronteraId,
   type EscenarioId, type ConsultaId,
 } from "./datos";
@@ -20,6 +20,7 @@ export type EntradasEdificio = {
   redundancia: RedundanciaId;
   frontera: FronteraId;
   calibracion: CalibId;
+  wue: number;
 };
 
 export type SalidasEdificio = ReturnType<typeof modelarEdificio>;
@@ -49,6 +50,14 @@ export function modelarEdificio(e: EntradasEdificio) {
     ? ([(anualkWh * s.feRango[0]) / 1e6, (anualkWh * s.feRango[1]) / 1e6] as [number, number])
     : null;
 
+  // Agua directa. El WUE se define sobre el kWh de TI, NO sobre el del medidor.
+  const tiAnualkWh = tiMW * HORAS_ANIO * 1000;
+  const aguaLitros = tiAnualkWh * e.wue;
+  const aguaM3 = aguaLitros / 1000;
+  const aguaHogares = aguaM3 / (AGUA_VARA.m3mes * 12);
+  // Referencia de agua indirecta con el único factor publicado que tenemos (EE. UU.)
+  const aguaIndirectaRefM3 = (anualkWh * AGUA_INDIRECTA_EEUU.dc) / 1000;
+
   // Redundancia: módulos que hay que comprar para sostener la carga del medidor
   const modulosNecesarios = Math.ceil((medidorMW * 1000) / FUENTE.moduloUPS_kW.v);
   const modulosInstalados = REDUNDANCIA[e.redundancia].mult(modulosNecesarios);
@@ -68,6 +77,7 @@ export function modelarEdificio(e: EntradasEdificio) {
     tiMW, medidorMW, anualGWh, calorMW: tiMW,
     hogares, pctDemandaPais, pctMargenFirme, diasPais, racks,
     tCO2e, tCO2eRango,
+    aguaLitros, aguaM3, aguaHogares, aguaIndirectaRefM3, tiAnualkWh,
     modulosNecesarios, modulosInstalados, upsCompradaMW, factorCargaUPS,
     reparto,
     hueco: FRONTERA[e.frontera].hueco,

@@ -67,6 +67,35 @@ export const FRONTERA = {
 } as const;
 export type FronteraId = keyof typeof FRONTERA;
 
+/* ─────────────── Agua ───────────────
+   OJO: el WUE se define sobre el kWh del EQUIPO INFORMÁTICO, no sobre el del
+   medidor. LBNL 2024, pág. 39: «total water consumption of the data center
+   divided by the electricity demand of the IT equipment». Dividir por el
+   medidor sobreestima el agua en un factor igual al PUE. */
+
+export const WUE_ANCLA = [
+  { v: 0.36, et: "0,36 · parque EE. UU. 2023", id: "lbnl_wue_eeuu" },
+  { v: 0.5,  et: "0,50 · promedio mundial",    id: "iea_wue_regional" },
+  { v: 0.48, et: "0,48 · EE. UU. tras 2023",   id: "lbnl_wue_eeuu" },
+  { v: 1.65, et: "1,65 · Asia-Pacífico",       id: "iea_wue_regional" },
+] as const;
+
+/** Consumo básico de agua que fija la CRA, por altitud. Resolución CRA 750/2016, art. 3. */
+export const AGUA_CRA = {
+  alta:  { m3mes: 11, et: "sobre 2.000 m" },
+  media: { m3mes: 13, et: "entre 1.000 y 2.000 m" },
+  baja:  { m3mes: 16, et: "bajo 1.000 m" },
+} as const;
+
+/** Medellín está a ~1.495 m, así que le corresponde la franja media. */
+export const AGUA_VARA = AGUA_CRA.media;
+
+/** Agua indirecta: la que se consume generando la electricidad. Solo hay cifra de EE. UU. */
+export const AGUA_INDIRECTA_EEUU = {
+  dc: 4.52, pais: 4.35, unidad: "L/kWh", id: "lbnl_agua_indirecta",
+  hueco: "No hay cifra verificada de intensidad hídrica de la red colombiana. En EE. UU. el agua indirecta es unas 12 veces la directa, así que este hueco no es menor: es probablemente la parte más grande del consumo de agua, y no la podemos contar.",
+} as const;
+
 /** Presets de utilización del LBNL, por tipo de instalación (EE. UU., 2014 → 2027). */
 export const PRESET_UTIL = [
   { et: "Internos y pequeños", v: 20, rango: "11 % → 20 %" },
