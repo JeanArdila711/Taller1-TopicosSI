@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root{
+  --paper:#ffffff;
+  --paper-2:#f4f4f4;
+  --ink:#0a0a0a;
+  --ink-2:#3d3d3d;
+  --ink-3:#767676;
+  --linea:#d6d6d6;
+  --linea-2:#ebebeb;
+  /* bandera */
+  --amarillo:#FCD116;
+  --azul:#003893;
+  --rojo:#CE1126;
+  --acento:var(--ink);
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0a0a0a;
+    --paper-2:#141414;
+    --ink:#f2f2f2;
+    --ink-2:#c2c2c2;
+    --ink-3:#8a8a8a;
+    --linea:#2e2e2e;
+    --linea-2:#1e1e1e;
+    --azul:#4a86e8;
+    --rojo:#f0685c;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0a0a0a; --paper-2:#141414; --ink:#f2f2f2; --ink-2:#c2c2c2;
+  --ink-3:#8a8a8a; --linea:#2e2e2e; --linea-2:#1e1e1e;
+  --azul:#4a86e8; --rojo:#f0685c;
+}
+
+@theme inline{
+  --color-paper:var(--paper);
+  --color-paper-2:var(--paper-2);
+  --color-ink:var(--ink);
+  --color-ink-2:var(--ink-2);
+  --color-ink-3:var(--ink-3);
+  --color-linea:var(--linea);
+  --color-linea-2:var(--linea-2);
+  --color-amarillo:var(--amarillo);
+  --color-azul:var(--azul);
+  --color-rojo:var(--rojo);
+  --font-sans:"Fira Sans",system-ui,sans-serif;
+  --font-mono:"Fira Code",ui-monospace,monospace;
+}
+
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── slider: pista negra, pulgar cuadrado, acento por sección ── */
+input[type="range"]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;background:transparent;cursor:pointer;
+  height:44px; /* área táctil mínima */
+}
+input[type="range"]::-webkit-slider-runnable-track{
+  height:2px;background:var(--linea);
+}
+input[type="range"]::-moz-range-track{height:2px;background:var(--linea)}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:18px;height:18px;margin-top:-8px;
+  background:var(--ink);border:2px solid var(--acento);
+  border-radius:0;transition:transform .15s ease,background .15s ease;
+}
+input[type="range"]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:0;
+  background:var(--ink);border:2px solid var(--acento);
+}
+input[type="range"]:hover::-webkit-slider-thumb{background:var(--acento)}
+input[type="range"]:hover::-moz-range-thumb{background:var(--acento)}
+input[type="range"]:focus-visible::-webkit-slider-thumb{
+  outline:2px solid var(--acento);outline-offset:3px;
+}
+input[type="range"]:focus-visible::-moz-range-thumb{
+  outline:2px solid var(--acento);outline-offset:3px;
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  input[type="range"]::-webkit-slider-thumb{transition:none}
+}
