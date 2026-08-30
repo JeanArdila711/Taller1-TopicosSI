@@ -225,7 +225,7 @@
   {
     "id": "margen_energia_firme_2025",
     "estado": "DERIVADO POR NOSOTROS",
-    "valor": "5,33 TWh de margen — un centro de datos de 100 MW se lleva el 19,7 %",
+    "valor": "5,33 TWh de margen — 100 MW de placa a utilización típica (40 %, PUE 1,40) se llevan 9,3 %; el mismo tamaño a plena carga (100 % de utilización, PUE 1,20 — 100 MW de equipo informático) se lleva 19,7 %",
     "unidad": "margen de energía firme del SIN sobre la demanda",
     "nivel": "derivado de nivel A",
     "fuente": "cálculo propio sobre dos series de XM",
