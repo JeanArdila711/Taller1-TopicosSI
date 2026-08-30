@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fira_Sans, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { TITULO, SUBTITULO } from "./site";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const firaSans = Fira_Sans({
+  variable: "--font-fira-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const firaCode = Fira_Code({
+  variable: "--font-fira-code",
   subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -20,11 +24,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es" className={`${firaSans.variable} ${firaCode.variable} h-full`}>
+      <body className="min-h-full">
+        <a href="#tablero" className="saltar">Saltar al tablero</a>
+        {children}
+      </body>
     </html>
   );
 }

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "tsc lib/datos.ts lib/modelo.ts lib/modelo.check.ts --outDir .check --rootDir lib --module commonjs --target es2022 --skipLibCheck && node .check/modelo.check.js"
+    "check": "tsc lib/datos.ts lib/modelo.ts lib/modelo.check.ts --outDir .check --rootDir lib --module commonjs --target es2022 --skipLibCheck && node .check/modelo.check.js && node scripts/check-fichas.mjs"
   },
   "dependencies": {
     "next": "16.3.2",

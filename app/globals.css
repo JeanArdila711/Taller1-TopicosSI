@@ -1,38 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Tokens. Blanco y negro de base; la bandera entra como función,
+   no como adorno: amarillo = el edificio, azul = el mundo,
+   rojo = hueco declarado. Ningún color se usa fuera de su papel.
+   ───────────────────────────────────────────────────────────── */
 
 :root{
   --paper:#ffffff;
-  --paper-2:#f4f4f4;
+  --paper-2:#f5f5f4;
   --ink:#0a0a0a;
   --ink-2:#3d3d3d;
-  --ink-3:#767676;
-  --linea:#d6d6d6;
-  --linea-2:#ebebeb;
-  /* bandera */
+  --ink-3:#6b6b6b;      /* 5,4:1 sobre papel — pasa AA en texto pequeño */
+  --linea:#d4d4d2;
+  --linea-2:#eaeae8;
+
+  /* bandera: relleno */
   --amarillo:#FCD116;
   --azul:#003893;
   --rojo:#CE1126;
+  /* bandera: texto. El amarillo de bandera sobre blanco da 1,4:1 y es
+     ilegible, así que para TEXTO se usa el ocre oscuro (6,3:1). */
+  --amarillo-txt:#7a5c00;
+
   --acento:var(--ink);
+  --acento-txt:var(--ink);
+
+  /* escala tipográfica fluida, razón 1,25 */
+  --t--2:clamp(.6875rem, .665rem + .11vw, .75rem);
+  --t--1:clamp(.8125rem, .79rem + .11vw, .875rem);
+  --t-0 :clamp(.9375rem, .915rem + .11vw, 1rem);
+  --t-1 :clamp(1.0625rem, 1.02rem + .22vw, 1.1875rem);
+  --t-2 :clamp(1.25rem, 1.17rem + .4vw, 1.5rem);
+  --t-3 :clamp(1.625rem, 1.4rem + 1.1vw, 2.25rem);
+  --t-4 :clamp(2.125rem, 1.6rem + 2.6vw, 3.5rem);
+
+  /* rejilla de 8 */
+  --e-1:.25rem; --e-2:.5rem; --e-3:.75rem; --e-4:1rem;
+  --e-6:1.5rem; --e-8:2rem; --e-12:3rem; --e-16:4rem;
 }
 
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --paper:#0a0a0a;
-    --paper-2:#141414;
-    --ink:#f2f2f2;
-    --ink-2:#c2c2c2;
-    --ink-3:#8a8a8a;
-    --linea:#2e2e2e;
-    --linea-2:#1e1e1e;
+    --paper-2:#151514;
+    --ink:#f2f2f0;
+    --ink-2:#c2c2be;
+    --ink-3:#8a8a86;
+    --linea:#2e2e2c;
+    --linea-2:#1d1d1c;
     --azul:#4a86e8;
     --rojo:#f0685c;
+    --amarillo-txt:var(--amarillo);
   }
 }
 :root[data-theme="dark"]{
-  --paper:#0a0a0a; --paper-2:#141414; --ink:#f2f2f2; --ink-2:#c2c2c2;
-  --ink-3:#8a8a8a; --linea:#2e2e2e; --linea-2:#1e1e1e;
-  --azul:#4a86e8; --rojo:#f0685c;
+  --paper:#0a0a0a; --paper-2:#151514; --ink:#f2f2f0; --ink-2:#c2c2be;
+  --ink-3:#8a8a86; --linea:#2e2e2c; --linea-2:#1d1d1c;
+  --azul:#4a86e8; --rojo:#f0685c; --amarillo-txt:var(--amarillo);
 }
 
 @theme inline{
@@ -46,47 +71,97 @@
   --color-amarillo:var(--amarillo);
   --color-azul:var(--azul);
   --color-rojo:var(--rojo);
-  --font-sans:"Fira Sans",system-ui,sans-serif;
-  --font-mono:"Fira Code",ui-monospace,monospace;
+  --font-sans:var(--font-fira-sans),ui-sans-serif,system-ui,sans-serif;
+  --font-mono:var(--font-fira-code),ui-monospace,monospace;
+
+  --text-nota:var(--t--2);
+  --text-menor:var(--t--1);
+  --text-base:var(--t-0);
+  --text-mayor:var(--t-1);
+  --text-titulo:var(--t-2);
+  --text-seccion:var(--t-3);
+  --text-portada:var(--t-4);
 }
+
+html{ color-scheme:light dark; }
 
 body{
   background:var(--paper);
   color:var(--ink);
   font-family:var(--font-sans);
+  font-size:var(--t-0);
+  line-height:1.55;
   -webkit-font-smoothing:antialiased;
 }
 
-/* ── slider: pista negra, pulgar cuadrado, acento por sección ── */
+h1,h2,h3{ text-wrap:balance; line-height:1.15; }
+p{ text-wrap:pretty; }
+
+/* Números siempre en cuadrícula: una cifra que baila al mover una perilla
+   se lee como ruido, no como dato. */
+output, .tabular{ font-variant-numeric:tabular-nums; }
+
+:focus-visible{ outline:2px solid var(--acento); outline-offset:2px; }
+
+
+/* ─────────────── segmentado ─────────────── */
+
+/* Un grupo de 4 opciones no cabe en 375 px: en móvil baja a --cols-m
+   y a partir de 640 px vuelve a --cols. Sin duplicar markup. */
+.segmentado{ grid-template-columns:repeat(var(--cols-m), minmax(0,1fr)); }
+@media (min-width:640px){
+  .segmentado{ grid-template-columns:repeat(var(--cols), minmax(0,1fr)); }
+}
+
+/* ─────────────── slider ─────────────── */
+
 input[type="range"]{
   -webkit-appearance:none;appearance:none;
   width:100%;background:transparent;cursor:pointer;
   height:44px; /* área táctil mínima */
 }
-input[type="range"]::-webkit-slider-runnable-track{
-  height:2px;background:var(--linea);
-}
-input[type="range"]::-moz-range-track{height:2px;background:var(--linea)}
+input[type="range"]::-webkit-slider-runnable-track{ height:2px;background:var(--linea); }
+input[type="range"]::-moz-range-track{ height:2px;background:var(--linea); }
 input[type="range"]::-webkit-slider-thumb{
   -webkit-appearance:none;appearance:none;
   width:18px;height:18px;margin-top:-8px;
   background:var(--ink);border:2px solid var(--acento);
-  border-radius:0;transition:transform .15s ease,background .15s ease;
+  border-radius:0;transition:background .15s ease;
 }
 input[type="range"]::-moz-range-thumb{
   width:18px;height:18px;border-radius:0;
   background:var(--ink);border:2px solid var(--acento);
 }
-input[type="range"]:hover::-webkit-slider-thumb{background:var(--acento)}
-input[type="range"]:hover::-moz-range-thumb{background:var(--acento)}
-input[type="range"]:focus-visible::-webkit-slider-thumb{
-  outline:2px solid var(--acento);outline-offset:3px;
+input[type="range"]:hover::-webkit-slider-thumb{ background:var(--acento); }
+input[type="range"]:hover::-moz-range-thumb{ background:var(--acento); }
+input[type="range"]:focus-visible{ outline:none; }
+input[type="range"]:focus-visible::-webkit-slider-thumb{ outline:2px solid var(--acento);outline-offset:3px; }
+input[type="range"]:focus-visible::-moz-range-thumb{ outline:2px solid var(--acento);outline-offset:3px; }
+
+/* ─────────────── ficha de fuente ─────────────── */
+
+dialog.ficha{
+  margin:auto;
+  max-height:calc(100dvh - 2rem);
 }
-input[type="range"]:focus-visible::-moz-range-thumb{
-  outline:2px solid var(--acento);outline-offset:3px;
+dialog.ficha::backdrop{
+  background:color-mix(in srgb, #0a0a0a 55%, transparent);
+}
+dialog.ficha[open]{ animation:ficha-entra .18s cubic-bezier(.32,.94,.6,1); }
+@keyframes ficha-entra{
+  from{ opacity:0; transform:translateY(8px); }
+  to  { opacity:1; transform:none; }
+}
+
+/* ─────────────── salto al contenido ─────────────── */
+
+.saltar{ position:absolute; left:-9999px; }
+.saltar:focus{
+  left:var(--e-4);top:var(--e-4);z-index:50;
+  background:var(--ink);color:var(--paper);
+  padding:var(--e-2) var(--e-4);
 }
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
-  input[type="range"]::-webkit-slider-thumb{transition:none}
 }

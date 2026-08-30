@@ -36,10 +36,6 @@ ok("calor a remover (MW)", b.calorMW, 35, 0.01);
 ok("días de Colombia entera", b.diasPais, 1.7, 0.03);
 
 console.log("\n— Emisiones: la trampa de gramos a toneladas —");
-const c = modelarEdificio({
-  placaMW: 100 / (1 / 1.2) / 1.2, pue: 1.2, utilPct: 100, sitio: "medellin",
-  redundancia: "N", frontera: "edificio", calibracion: "medido", wue: 0.5,
-});
 const ref = modelarEdificio({
   placaMW: 135.14, pue: 1.2, utilPct: 100, sitio: "medellin",
   redundancia: "N", frontera: "edificio", calibracion: "medido", wue: 0.5,

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Salida de `pnpm check`: JS compilado, no fuente.
+    ".check/**",
   ]),
 ]);
 

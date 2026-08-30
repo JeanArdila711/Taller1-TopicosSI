@@ -1,19 +1,50 @@
 "use client";
 
 import { useId } from "react";
+import { Cita } from "@/components/Fuente";
 
 type Acento = "amarillo" | "azul" | "ink";
-const ACENTO: Record<Acento, string> = {
+
+/** Relleno (barras, pulgares, fondos) vs. texto: el amarillo de bandera
+    es ilegible sobre papel blanco, así que tiene un par distinto. */
+const RELLENO: Record<Acento, string> = {
   amarillo: "var(--amarillo)",
   azul: "var(--azul)",
   ink: "var(--ink)",
 };
+const TEXTO: Record<Acento, string> = {
+  amarillo: "var(--amarillo-txt)",
+  azul: "var(--azul)",
+  ink: "var(--ink)",
+};
+/** Texto que va ENCIMA del relleno. */
+const SOBRE_RELLENO: Record<Acento, string> = {
+  amarillo: "#0a0a0a",
+  azul: "var(--paper)",
+  ink: "var(--paper)",
+};
+
+function vars(acento: Acento) {
+  return {
+    ["--acento" as string]: RELLENO[acento],
+    ["--acento-txt" as string]: TEXTO[acento],
+  };
+}
+
+/* ─────────────── Etiqueta común ─────────────── */
+
+function Etiqueta({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
+  const clase = "font-mono text-nota uppercase tracking-[.13em] text-ink-3";
+  return htmlFor
+    ? <label htmlFor={htmlFor} className={clase}>{children}</label>
+    : <span className={clase}>{children}</span>;
+}
 
 /* ─────────────── Perilla continua ─────────────── */
 
 export function Perilla({
   etiqueta, valor, min, max, paso, onChange, formato,
-  fuente, acento = "ink", anclas,
+  fuente, acento = "ink", anclas, citas,
 }: {
   etiqueta: string;
   valor: number;
@@ -25,17 +56,19 @@ export function Perilla({
   fuente?: string;
   acento?: Acento;
   anclas?: { v: number; et: string }[];
+  citas?: string[];
 }) {
   const id = useId();
   const pct = ((valor - min) / (max - min)) * 100;
 
   return (
-    <div className="flex flex-col gap-1" style={{ ["--acento" as string]: ACENTO[acento] }}>
+    <div className="flex flex-col gap-1" style={vars(acento)}>
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="font-mono text-[11px] uppercase tracking-[.13em] text-ink-3">
+        <Etiqueta htmlFor={id}>
           {etiqueta}
-        </label>
-        <output htmlFor={id} className="font-sans text-xl font-semibold tabular-nums">
+          {citas && <Cita ids={citas} />}
+        </Etiqueta>
+        <output htmlFor={id} className="text-mayor font-semibold leading-none">
           {formato(valor)}
         </output>
       </div>
@@ -56,14 +89,13 @@ export function Perilla({
         <div
           aria-hidden
           className="pointer-events-none absolute left-0 top-1/2 h-[2px] -translate-y-1/2"
-          style={{ width: `${pct}%`, background: ACENTO[acento] }}
+          style={{ width: `${pct}%`, background: RELLENO[acento] }}
         />
         {/* marcas de anclas publicadas */}
         {anclas?.map((a) => (
           <div
             key={a.et}
             aria-hidden
-            title={a.et}
             className="pointer-events-none absolute top-1/2 h-3 w-[1px] -translate-y-1/2 bg-ink-3"
             style={{ left: `${((a.v - min) / (max - min)) * 100}%` }}
           />
@@ -71,14 +103,14 @@ export function Perilla({
       </div>
 
       {anclas && anclas.length > 0 && (
-        <div className="flex flex-wrap gap-x-3 font-mono text-[10px] text-ink-3">
+        <ul className="flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-nota text-ink-3">
           {anclas.map((a) => (
-            <span key={a.et}>| {a.et}</span>
+            <li key={a.et} className="before:mr-1 before:content-['|']">{a.et}</li>
           ))}
-        </div>
+        </ul>
       )}
       {fuente && (
-        <p id={`${id}-f`} className="font-mono text-[10px] leading-snug text-ink-3">
+        <p id={`${id}-f`} className="max-w-[62ch] font-mono text-nota leading-snug text-ink-3">
           {fuente}
         </p>
       )}
@@ -89,7 +121,7 @@ export function Perilla({
 /* ─────────────── Perilla discreta ─────────────── */
 
 export function Segmentado<T extends string>({
-  etiqueta, valor, opciones, onChange, fuente, acento = "ink", columnas,
+  etiqueta, valor, opciones, onChange, fuente, acento = "ink", columnas, columnasMovil, citas,
 }: {
   etiqueta: string;
   valor: T;
@@ -98,16 +130,26 @@ export function Segmentado<T extends string>({
   fuente?: string;
   acento?: Acento;
   columnas?: number;
+  columnasMovil?: number;
+  citas?: string[];
 }) {
   const activa = opciones.find((o) => o.id === valor);
+  const cols = columnas ?? opciones.length;
+  const colsM = columnasMovil ?? Math.min(cols, 2);
+
   return (
-    <div className="flex flex-col gap-2">
-      <span className="font-mono text-[11px] uppercase tracking-[.13em] text-ink-3">{etiqueta}</span>
+    <div className="flex flex-col gap-2" style={vars(acento)}>
+      {etiqueta && (
+        <Etiqueta>
+          {etiqueta}
+          {citas && <Cita ids={citas} />}
+        </Etiqueta>
+      )}
       <div
         role="radiogroup"
-        aria-label={etiqueta}
-        className="grid gap-[1px] border border-linea bg-linea"
-        style={{ gridTemplateColumns: `repeat(${columnas ?? opciones.length}, minmax(0,1fr))` }}
+        aria-label={etiqueta || undefined}
+        className="segmentado grid gap-[1px] border border-linea bg-linea"
+        style={{ ["--cols" as string]: cols, ["--cols-m" as string]: colsM }}
       >
         {opciones.map((o) => {
           const on = o.id === valor;
@@ -118,11 +160,10 @@ export function Segmentado<T extends string>({
               role="radio"
               aria-checked={on}
               onClick={() => onChange(o.id)}
-              className="min-h-[44px] cursor-pointer px-2 py-2 font-sans text-[13px] font-medium leading-tight transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+              className="min-h-[44px] cursor-pointer px-2 py-2 text-menor font-medium leading-tight transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
               style={{
-                background: on ? ACENTO[acento] : "var(--paper)",
-                color: on ? (acento === "amarillo" ? "#0a0a0a" : "var(--paper)") : "var(--ink-2)",
-                outlineColor: ACENTO[acento],
+                background: on ? RELLENO[acento] : "var(--paper)",
+                color: on ? SOBRE_RELLENO[acento] : "var(--ink-2)",
               }}
             >
               {o.et}
@@ -130,8 +171,8 @@ export function Segmentado<T extends string>({
           );
         })}
       </div>
-      {activa?.desc && <p className="text-[12.5px] leading-snug text-ink-2">{activa.desc}</p>}
-      {fuente && <p className="font-mono text-[10px] leading-snug text-ink-3">{fuente}</p>}
+      {activa?.desc && <p className="max-w-[62ch] text-menor leading-snug text-ink-2">{activa.desc}</p>}
+      {fuente && <p className="max-w-[62ch] font-mono text-nota leading-snug text-ink-3">{fuente}</p>}
     </div>
   );
 }
@@ -139,37 +180,43 @@ export function Segmentado<T extends string>({
 /* ─────────────── Salidas ─────────────── */
 
 export function Cifra({
-  valor, unidad, acento, derivado,
+  valor, unidad, acento, derivado, citas,
 }: {
   valor: string;
   unidad: string;
   acento?: Acento;
   derivado?: boolean;
+  citas?: string[];
 }) {
   return (
-    <div className="flex flex-col gap-0.5 border-l-2 pl-3" style={{ borderColor: acento ? ACENTO[acento] : "var(--linea)" }}>
-      <span className="font-sans text-[26px] font-semibold leading-none tabular-nums">{valor}</span>
-      <span className="text-[12px] leading-tight text-ink-3">
+    <div
+      className="flex flex-col gap-1 pt-2"
+      style={{
+        borderTop: acento ? `2px solid ${RELLENO[acento]}` : "1px solid var(--linea)",
+      }}
+    >
+      <span
+        className="tabular text-titulo font-semibold leading-none"
+        style={derivado ? { textDecoration: "underline dotted", textUnderlineOffset: "5px", textDecorationColor: "var(--ink-3)" } : undefined}
+      >
+        {valor}
+      </span>
+      <span className="text-nota leading-snug text-ink-3">
         {unidad}
-        {derivado && <span className="ml-1 font-mono text-[10px] uppercase text-ink-3">· derivado</span>}
+        {derivado && <span className="ml-1 font-mono uppercase tracking-[.08em]">· derivado</span>}
+        {citas && <Cita ids={citas} />}
       </span>
     </div>
   );
 }
 
-export function Hueco({ texto }: { texto: string }) {
+/** Lo que el tablero decide NO contar. Va en letra chica al lado de la fuente:
+    la advertencia importa, el cuadro rojo gritando no. */
+export function Nota({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="flex gap-2.5 border p-3"
-      style={{ borderColor: "var(--rojo)", background: "color-mix(in srgb, var(--rojo) 7%, transparent)" }}
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--rojo)" strokeWidth="2" className="mt-0.5 shrink-0" aria-hidden>
-        <circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16.5v.01" strokeLinecap="round" />
-      </svg>
-      <p className="text-[12.5px] leading-snug" style={{ color: "var(--rojo)" }}>
-        <strong className="font-semibold">Hueco declarado. </strong>{texto}
-      </p>
-    </div>
+    <p className="max-w-[62ch] border-t border-linea pt-2 font-mono text-nota leading-snug text-ink-3">
+      <strong className="font-medium text-ink-2">No contamos: </strong>{children}
+    </p>
   );
 }
 
