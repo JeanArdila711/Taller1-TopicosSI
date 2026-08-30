@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ResponsiveContainer, ComposedChart, Line, XAxis, YAxis, CartesianGrid, ReferenceArea,
+} from "recharts";
 import { TITULO, SUBTITULO, INTEGRANTES, CURSO } from "./site";
 import { Perilla, Segmentado, Cifra, Nota, Bandera } from "@/components/Controles";
 import { ProveedorFuentes, Cita } from "@/components/Fuente";
@@ -52,6 +55,25 @@ export default function Home() {
 
   /* ── Puente ── */
   const [vara, setVara] = useState<VaraId>("colombias");
+
+  /* Qué sección está a la vista, para que el nav diga dónde estás. */
+  const [seccionActiva, setSeccionActiva] = useState(SECCIONES[0].id);
+  const vistas = useRef(new Map<string, number>());
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entradas) => {
+        for (const e of entradas) vistas.current.set(e.target.id, e.intersectionRatio);
+        const [top] = [...vistas.current].sort((a, b) => b[1] - a[1]);
+        if (top && top[1] > 0) setSeccionActiva(top[0]);
+      },
+      { rootMargin: "-64px 0px -60% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+    );
+    for (const x of SECCIONES) {
+      const el = document.getElementById(x.id);
+      if (el) obs.observe(el);
+    }
+    return () => obs.disconnect();
+  }, []);
 
   const base = { placaMW, pue, utilPct, redundancia, frontera, calibracion, wue };
   const b = useMemo(
@@ -116,16 +138,25 @@ export default function Home() {
           className="sticky top-0 z-30 -mx-5 mb-12 border-b border-linea bg-paper/95 px-5 backdrop-blur-sm sm:-mx-8 sm:px-8"
         >
           <ul className="flex gap-1 overflow-x-auto">
-            {SECCIONES.map((x) => (
-              <li key={x.id}>
-                <a
-                  href={`#${x.id}`}
-                  className="inline-flex min-h-[44px] items-center whitespace-nowrap border-b-2 border-transparent px-3 font-mono text-menor text-ink-2 transition-colors duration-150 hover:border-ink hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
-                >
-                  {x.et}
-                </a>
-              </li>
-            ))}
+            {SECCIONES.map((x) => {
+              const activa = x.id === seccionActiva;
+              return (
+                <li key={x.id}>
+                  <a
+                    href={`#${x.id}`}
+                    aria-current={activa ? "location" : undefined}
+                    className="inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap border-b-2 px-3 font-mono text-menor transition-colors duration-150 hover:border-ink hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+                    style={{
+                      borderColor: activa ? "var(--ink)" : "transparent",
+                      color: activa ? "var(--ink)" : "var(--ink-2)",
+                      fontWeight: activa ? 600 : 400,
+                    }}
+                  >
+                    {x.et}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
@@ -138,94 +169,106 @@ export default function Home() {
 
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
 
-              {/* perillas */}
-              <div className="flex min-w-0 flex-col gap-7">
-                <Perilla
-                  etiqueta="Potencia informática instalada" acento="amarillo"
-                  valor={placaMW} min={1} max={500} paso={1} onChange={setPlaca}
-                  formato={(v) => `${n0.format(v)} MW`}
-                  anclas={[{ v: 100, et: "100 MW · referencia PNUD" }]}
-                  citas={["undp_empleo_dc_100mw"]}
-                  fuente="Placa del equipo. La referencia del PNUD para empleo y consumo es 100 MW."
-                />
-
-                <div className="flex flex-col gap-2">
+              {/* perillas, agrupadas en cuatro decisiones en vez de un muro de controles */}
+              <div className="flex min-w-0 flex-col gap-9">
+                <div className="flex flex-col gap-6">
+                  <Rubro>01 · La carga que se monta</Rubro>
                   <Perilla
-                    etiqueta="Utilización del equipo" acento="amarillo"
-                    valor={utilPct} min={0} max={100} paso={1} onChange={setUtil}
-                    formato={(v) => `${n0.format(v)} %`}
-                    anclas={PRESET_UTIL.map((p) => ({ v: p.v, et: `${p.et} ${p.v} %` }))}
-                    citas={["lbnl_utilizacion_servidores"]}
-                    fuente="LBNL 2024, pág. 27 · EE. UU. Es la perilla que más mueve el resultado: 1,90× contra 1,39× del PUE."
+                    etiqueta="Potencia informática instalada" acento="amarillo"
+                    valor={placaMW} min={1} max={500} paso={1} onChange={setPlaca}
+                    formato={(v) => `${n0.format(v)} MW`}
+                    anclas={[{ v: 100, et: "100 MW · referencia PNUD" }]}
+                    citas={["undp_empleo_dc_100mw"]}
+                    fuente="Placa del equipo. La referencia del PNUD para empleo y consumo es 100 MW."
                   />
-                  <div className="flex flex-wrap gap-2">
-                    {PRESET_UTIL.map((p) => (
-                      <button key={p.et} type="button" onClick={() => setUtil(p.v)}
-                        aria-pressed={utilPct === p.v}
-                        className="min-h-[36px] cursor-pointer border px-2.5 py-1.5 font-mono text-nota transition-colors duration-200 focus-visible:outline-2"
-                        style={{
-                          borderColor: utilPct === p.v ? "var(--ink)" : "var(--linea)",
-                          color: utilPct === p.v ? "var(--ink)" : "var(--ink-2)",
-                        }}>
-                        {p.et} · {p.rango}
-                      </button>
-                    ))}
+
+                  <div className="flex flex-col gap-2">
+                    <Perilla
+                      etiqueta="Utilización del equipo" acento="amarillo"
+                      valor={utilPct} min={0} max={100} paso={1} onChange={setUtil}
+                      formato={(v) => `${n0.format(v)} %`}
+                      anclas={PRESET_UTIL.map((p) => ({ v: p.v, et: `${p.et} ${p.v} %` }))}
+                      citas={["lbnl_utilizacion_servidores"]}
+                      fuente="LBNL 2024, pág. 27 · EE. UU. Es la perilla que más mueve el resultado: 1,90× contra 1,39× del PUE."
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      {PRESET_UTIL.map((p) => (
+                        <button key={p.et} type="button" onClick={() => setUtil(p.v)}
+                          aria-pressed={utilPct === p.v}
+                          className="min-h-[36px] cursor-pointer border px-2.5 py-1.5 font-mono text-nota transition-colors duration-200 focus-visible:outline-2"
+                          style={{
+                            borderColor: utilPct === p.v ? "var(--ink)" : "var(--linea)",
+                            color: utilPct === p.v ? "var(--ink)" : "var(--ink-2)",
+                          }}>
+                          {p.et} · {p.rango}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <Perilla
-                  etiqueta="PUE del edificio" acento="amarillo"
-                  valor={pue} min={1.05} max={1.9} paso={0.01} onChange={setPue}
-                  formato={(v) => n2.format(v)}
-                  anclas={[{ v: 1.15, et: "1,15 piso 2028" }, { v: 1.4, et: "1,40 parque 2023" }, { v: 1.6, et: "1,60 parque 2014" }]}
-                  citas={["lbnl_pue_eeuu"]}
-                  fuente="LBNL 2024, pág. 47 · EE. UU. Proyecta entre 1,15 y 1,35 para 2028."
-                />
+                <div className="flex flex-col gap-6 border-t border-linea pt-7">
+                  <Rubro>02 · Cómo se comporta el edificio</Rubro>
+                  <Perilla
+                    etiqueta="PUE del edificio" acento="amarillo"
+                    valor={pue} min={1.05} max={1.9} paso={0.01} onChange={setPue}
+                    formato={(v) => n2.format(v)}
+                    anclas={[{ v: 1.15, et: "1,15 piso 2028" }, { v: 1.4, et: "1,40 parque 2023" }, { v: 1.6, et: "1,60 parque 2014" }]}
+                    citas={["lbnl_pue_eeuu"]}
+                    fuente="LBNL 2024, pág. 47 · EE. UU. Proyecta entre 1,15 y 1,35 para 2028."
+                  />
 
-                <Perilla
-                  etiqueta="WUE · agua por kWh de equipo" acento="amarillo"
-                  valor={wue} min={0.05} max={2} paso={0.01} onChange={setWue}
-                  formato={(v) => `${n2.format(v)} L/kWh`}
-                  anclas={WUE_ANCLA.map((w) => ({ v: w.v, et: w.et }))}
-                  citas={["lbnl_wue_definicion", "lbnl_wue_eeuu", "iea_wue_regional"]}
-                  fuente="El WUE se define sobre el kWh del EQUIPO, no del medidor (LBNL pág. 39). Dividir por el medidor sobreestima el agua en un factor igual al PUE."
-                />
-
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <Bandera activa={sitio === "medellin"} />
-                    <span className="font-mono text-nota text-ink-3">{s.pais}</span>
-                  </div>
-                  <Segmentado<SitioId>
-                    etiqueta="Sitio · clima y mezcla de generación" acento="amarillo"
-                    valor={sitio} onChange={setSitio}
-                    citas={["xm_factor_emision_2025", "egrid_virginia_2023", "clima_virginia_4a"]}
-                    opciones={[
-                      { id: "medellin", et: "Medellín", desc: `${SITIO.medellin.clima} ${SITIO.medellin.agua}` },
-                      { id: "virginia", et: "Virginia", desc: `${SITIO.virginia.clima} ${SITIO.virginia.agua}` },
-                    ]}
-                    fuente={`Factor de emisión ${n1.format(s.factorEmision)} gCO₂e/kWh · ${sitio === "medellin" ? "XM 2025, promedio de 365 días" : "EPA eGRID2023, subregión SRVC"}`}
+                  <Perilla
+                    etiqueta="WUE · agua por kWh de equipo" acento="amarillo"
+                    valor={wue} min={0.05} max={2} paso={0.01} onChange={setWue}
+                    formato={(v) => `${n2.format(v)} L/kWh`}
+                    anclas={WUE_ANCLA.map((w) => ({ v: w.v, et: w.et }))}
+                    citas={["lbnl_wue_definicion", "lbnl_wue_eeuu", "iea_wue_regional"]}
+                    fuente="El WUE se define sobre el kWh del EQUIPO, no del medidor (LBNL pág. 39). Dividir por el medidor sobreestima el agua en un factor igual al PUE."
                   />
                 </div>
 
-                <Segmentado<RedundanciaId>
-                  etiqueta="Nivel de redundancia" acento="amarillo" columnas={4}
-                  valor={redundancia} onChange={setRed}
-                  opciones={(Object.keys(REDUNDANCIA) as RedundanciaId[]).map((k) => ({
-                    id: k, et: REDUNDANCIA[k].et, desc: REDUNDANCIA[k].desc,
-                  }))}
-                  fuente="Niveles del Uptime Institute. Módulo de UPS supuesto: 1.500 kW. Sin ficha propia todavía — supuesto del cuaderno del curso."
-                />
+                <div className="flex flex-col gap-6 border-t border-linea pt-7">
+                  <Rubro>03 · Dónde y con qué respaldo opera</Rubro>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <Bandera activa={sitio === "medellin"} />
+                      <span className="font-mono text-nota text-ink-3">{s.pais}</span>
+                    </div>
+                    <Segmentado<SitioId>
+                      etiqueta="Sitio · clima y mezcla de generación" acento="amarillo"
+                      valor={sitio} onChange={setSitio}
+                      citas={["xm_factor_emision_2025", "egrid_virginia_2023", "clima_virginia_4a"]}
+                      opciones={[
+                        { id: "medellin", et: "Medellín", desc: `${SITIO.medellin.clima} ${SITIO.medellin.agua}` },
+                        { id: "virginia", et: "Virginia", desc: `${SITIO.virginia.clima} ${SITIO.virginia.agua}` },
+                      ]}
+                      fuente={`Factor de emisión ${n1.format(s.factorEmision)} gCO₂e/kWh · ${sitio === "medellin" ? "XM 2025, promedio de 365 días" : "EPA eGRID2023, subregión SRVC"}`}
+                    />
+                  </div>
 
-                <Segmentado<FronteraId>
-                  etiqueta="Frontera declarada del sistema" acento="amarillo" columnas={3} columnasMovil={1}
-                  valor={frontera} onChange={setFrontera}
-                  opciones={(Object.keys(FRONTERA) as FronteraId[]).map((k) => ({
-                    id: k, et: FRONTERA[k].et, desc: FRONTERA[k].desc,
-                  }))}
-                  fuente="Mover esta perilla no agranda el número: abre un hueco. Declararlo es el método."
-                />
-                {b.hueco && <Nota>{b.hueco}</Nota>}
+                  <Segmentado<RedundanciaId>
+                    etiqueta="Nivel de redundancia" acento="amarillo" columnas={4}
+                    valor={redundancia} onChange={setRed}
+                    opciones={(Object.keys(REDUNDANCIA) as RedundanciaId[]).map((k) => ({
+                      id: k, et: REDUNDANCIA[k].et, desc: REDUNDANCIA[k].desc,
+                    }))}
+                    fuente="Niveles del Uptime Institute. Módulo de UPS supuesto: 1.500 kW. Sin ficha propia todavía — supuesto del cuaderno del curso."
+                  />
+                </div>
+
+                <div className="flex flex-col gap-6 border-t border-linea pt-7">
+                  <Rubro>04 · Qué declara contar</Rubro>
+                  <Segmentado<FronteraId>
+                    etiqueta="Frontera declarada del sistema" acento="amarillo" columnas={3} columnasMovil={1}
+                    valor={frontera} onChange={setFrontera}
+                    opciones={(Object.keys(FRONTERA) as FronteraId[]).map((k) => ({
+                      id: k, et: FRONTERA[k].et, desc: FRONTERA[k].desc,
+                    }))}
+                    fuente="Mover esta perilla no agranda el número: abre un hueco. Declararlo es el método."
+                  />
+                  {b.hueco && <Nota>{b.hueco}</Nota>}
+                </div>
               </div>
 
               {/* salidas */}
@@ -340,75 +383,81 @@ export default function Home() {
               bajada="Nada de esto es pronóstico nuestro. Son las anclas que la AIE publica, recorridas entre punto y punto." />
 
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-              <div className="flex min-w-0 flex-col gap-7">
-                <Segmentado<EscenarioId>
-                  etiqueta="Escenario de la AIE a 2035" acento="azul" columnas={2}
-                  valor={escenario} onChange={(v) => { setEsc(v); setUsarTasa(false); }}
-                  citas={["iea_escenarios_2035"]}
-                  opciones={(Object.keys(ESCENARIO) as EscenarioId[]).map((k) => ({
-                    id: k, et: `${ESCENARIO[k].et} · ${ESCENARIO[k].twh2035}`, desc: ESCENARIO[k].desc,
-                  }))}
-                  fuente="IEA, Energy and AI. El rango publicado va de 700 a 1.700 TWh."
-                />
-
-                <div className="flex flex-col gap-2 border border-linea p-4">
-                  <label className="flex min-h-[44px] cursor-pointer items-center gap-2.5">
-                    <input type="checkbox" checked={usarTasaPropia}
-                      onChange={(e) => setUsarTasa(e.target.checked)}
-                      className="h-4 w-4 cursor-pointer accent-[var(--azul)]" />
-                    <span className="text-menor font-medium">Usar trayectoria propia en vez del escenario</span>
-                  </label>
-                  <Perilla
-                    etiqueta="Tasa de crecimiento anual" acento="azul"
-                    valor={tasaPct} min={0} max={25} paso={0.5} onChange={(v) => { setTasa(v); setUsarTasa(true); }}
-                    formato={(v) => `${n1.format(v)} %`}
-                    anclas={[{ v: CRECIMIENTO_HISTORICO, et: "12 % histórico AIE" }]}
-                    citas={["iea_crecimiento_historico_12pct"]}
-                    fuente="Compuesta desde los 415 TWh de 2024. El 12 % histórico llega a 1.447 TWh en 2035."
+              <div className="flex min-w-0 flex-col gap-9">
+                <div className="flex flex-col gap-6">
+                  <Rubro>01 · La trayectoria a 2035</Rubro>
+                  <Segmentado<EscenarioId>
+                    etiqueta="Escenario de la AIE a 2035" acento="azul" columnas={2}
+                    valor={escenario} onChange={(v) => { setEsc(v); setUsarTasa(false); }}
+                    citas={["iea_escenarios_2035"]}
+                    opciones={(Object.keys(ESCENARIO) as EscenarioId[]).map((k) => ({
+                      id: k, et: `${ESCENARIO[k].et} · ${ESCENARIO[k].twh2035}`, desc: ESCENARIO[k].desc,
+                    }))}
+                    fuente="IEA, Energy and AI. El rango publicado va de 700 a 1.700 TWh."
                   />
-                  <p className="font-mono text-nota leading-snug" style={{ color: a.dentroDeBanda ? "var(--ink-3)" : "var(--rojo)" }}>
-                    {a.dentroDeBanda
-                      ? `Dentro de la banda publicada (${a.banda[0]}–${a.banda[1]} TWh)`
-                      : `FUERA de la banda publicada (${a.banda[0]}–${a.banda[1]} TWh). Hay que justificarlo.`}
-                  </p>
+
+                  <div className="flex flex-col gap-2 border border-linea p-4">
+                    <label className="flex min-h-[44px] cursor-pointer items-center gap-2.5">
+                      <input type="checkbox" checked={usarTasaPropia}
+                        onChange={(e) => setUsarTasa(e.target.checked)}
+                        className="h-4 w-4 cursor-pointer accent-[var(--azul)]" />
+                      <span className="text-menor font-medium">Usar trayectoria propia en vez del escenario</span>
+                    </label>
+                    <Perilla
+                      etiqueta="Tasa de crecimiento anual" acento="azul"
+                      valor={tasaPct} min={0} max={25} paso={0.5} onChange={(v) => { setTasa(v); setUsarTasa(true); }}
+                      formato={(v) => `${n1.format(v)} %`}
+                      anclas={[{ v: CRECIMIENTO_HISTORICO, et: "12 % histórico AIE" }]}
+                      citas={["iea_crecimiento_historico_12pct"]}
+                      fuente="Compuesta desde los 415 TWh de 2024. El 12 % histórico llega a 1.447 TWh en 2035."
+                    />
+                    <p className="font-mono text-nota leading-snug" style={{ color: a.dentroDeBanda ? "var(--ink-3)" : "var(--rojo)" }}>
+                      {a.dentroDeBanda
+                        ? `Dentro de la banda publicada (${a.banda[0]}–${a.banda[1]} TWh)`
+                        : `FUERA de la banda publicada (${a.banda[0]}–${a.banda[1]} TWh). Hay que justificarlo.`}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-2 border border-linea p-4">
-                  <label className="flex min-h-[44px] cursor-pointer items-center gap-2.5">
-                    <input type="checkbox" checked={pueParqueOn}
-                      onChange={(e) => setPueParqueOn(e.target.checked)}
-                      className="h-4 w-4 cursor-pointer accent-[var(--azul)]" />
-                    <span className="text-menor font-medium">Reescalar por PUE del parque mundial</span>
-                  </label>
+                <div className="flex flex-col gap-6 border-t border-linea pt-7">
+                  <Rubro>02 · Cuánto pesa la IA en ese total</Rubro>
+                  <div className="flex flex-col gap-2 border border-linea p-4">
+                    <label className="flex min-h-[44px] cursor-pointer items-center gap-2.5">
+                      <input type="checkbox" checked={pueParqueOn}
+                        onChange={(e) => setPueParqueOn(e.target.checked)}
+                        className="h-4 w-4 cursor-pointer accent-[var(--azul)]" />
+                      <span className="text-menor font-medium">Reescalar por PUE del parque mundial</span>
+                    </label>
+                    <Perilla
+                      etiqueta="PUE del parque" acento="azul"
+                      valor={pueParque} min={1.05} max={1.6} paso={0.01}
+                      onChange={(v) => { setPueParque(v); setPueParqueOn(true); }}
+                      formato={(v) => n2.format(v)}
+                      anclas={[{ v: 1.29, et: "1,29 en 2030" }, { v: 1.41, et: "1,41 en 2024" }, { v: 1.53, et: "1,53 en 2020" }]}
+                      citas={["pue_implicito_parque_mundial", "iea_it_electricity_by_region"]}
+                      fuente="DERIVADO por nosotros: panel total ÷ panel IT de la Table 2 del PNUD."
+                    />
+                  </div>
+
                   <Perilla
-                    etiqueta="PUE del parque" acento="azul"
-                    valor={pueParque} min={1.05} max={1.6} paso={0.01}
-                    onChange={(v) => { setPueParque(v); setPueParqueOn(true); }}
-                    formato={(v) => n2.format(v)}
-                    anclas={[{ v: 1.29, et: "1,29 en 2030" }, { v: 1.41, et: "1,41 en 2024" }, { v: 1.53, et: "1,53 en 2020" }]}
-                    citas={["pue_implicito_parque_mundial", "iea_it_electricity_by_region"]}
-                    fuente="DERIVADO por nosotros: panel total ÷ panel IT de la Table 2 del PNUD."
+                    etiqueta="Participación de la IA en el total" acento="azul"
+                    valor={participacionIAPct} min={0} max={100} paso={1} onChange={setIA}
+                    formato={(v) => `${n0.format(v)} %`}
+                    anclas={[{ v: 50, et: "≈ mitad del aumento neto a 2030" }]}
+                    citas={["iea_escenarios_2035"]}
+                    fuente="La AIE publica que los servidores acelerados explican casi la mitad del AUMENTO NETO a 2030 — no del total. Esta perilla es un supuesto nuestro."
+                  />
+
+                  <Segmentado<ConsultaId>
+                    etiqueta="Frontera por consulta" acento="azul" columnas={2}
+                    valor={consulta} onChange={setConsulta}
+                    citas={["google_energia_por_consulta"]}
+                    opciones={(Object.keys(CONSULTA) as ConsultaId[]).map((k) => ({
+                      id: k, et: `${CONSULTA[k].et} · ${n2.format(CONSULTA[k].wh)} Wh`, desc: CONSULTA[k].desc,
+                    }))}
+                    fuente="Google, arXiv:2508.15734. El factor de 2,4 entre las dos es textual del paper."
                   />
                 </div>
-
-                <Perilla
-                  etiqueta="Participación de la IA en el total" acento="azul"
-                  valor={participacionIAPct} min={0} max={100} paso={1} onChange={setIA}
-                  formato={(v) => `${n0.format(v)} %`}
-                  anclas={[{ v: 50, et: "≈ mitad del aumento neto a 2030" }]}
-                  citas={["iea_escenarios_2035"]}
-                  fuente="La AIE publica que los servidores acelerados explican casi la mitad del AUMENTO NETO a 2030 — no del total. Esta perilla es un supuesto nuestro."
-                />
-
-                <Segmentado<ConsultaId>
-                  etiqueta="Frontera por consulta" acento="azul" columnas={2}
-                  valor={consulta} onChange={setConsulta}
-                  citas={["google_energia_por_consulta"]}
-                  opciones={(Object.keys(CONSULTA) as ConsultaId[]).map((k) => ({
-                    id: k, et: `${CONSULTA[k].et} · ${n2.format(CONSULTA[k].wh)} Wh`, desc: CONSULTA[k].desc,
-                  }))}
-                  fuente="Google, arXiv:2508.15734. El factor de 2,4 entre las dos es textual del paper."
-                />
               </div>
 
               <div className="flex min-w-0 flex-col gap-6 border border-linea bg-paper-2 p-5 sm:p-6 lg:sticky lg:top-16 lg:self-start">
@@ -428,7 +477,8 @@ export default function Home() {
                   <Serie serie={a.serie} banda={a.banda} />
                   <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-nota text-ink-3">
                     <li>■ ancla publicada</li>
-                    <li>□ interpolado por nosotros</li>
+                    <li>— sólido: observado / interpolado hasta 2030</li>
+                    <li>┄ punteado: proyectado 2030–2035</li>
                     <li>▨ banda de la AIE a 2035</li>
                   </ul>
                 </div>
@@ -577,39 +627,48 @@ function Cuadro({ c }: { c: string }) {
   return <span aria-hidden className="mr-1 inline-block h-[8px] w-[8px] align-[1px]" style={{ background: c }} />;
 }
 
-/* Serie en SVG. Sin librerías: es una polilínea y una banda. */
+/* Anclas: años con dato publicado de la AIE, marcados con cuadrado (hueco en 2035). */
+const ANIOS_ANCLA = [2020, 2023, 2024, 2030, 2035];
+
+function MarcadorAncla(props: { cx?: number; cy?: number; payload?: { anio: number } }) {
+  const { cx, cy, payload } = props;
+  if (cx == null || cy == null || !payload || !ANIOS_ANCLA.includes(payload.anio)) return undefined;
+  const hueco = payload.anio === 2035;
+  return (
+    <rect key={`m${payload.anio}`} x={cx - 3} y={cy - 3} width={6} height={6}
+      fill={hueco ? "var(--paper)" : "var(--azul)"} stroke="var(--azul)" strokeWidth={1.5} />
+  );
+}
+
+/* Serie con Recharts: área observada/interpolada sólida hasta 2030, proyección punteada
+   de 2030 a 2035, y la banda de escenarios de la AIE marcada como franja en 2035. */
 function Serie({ serie, banda }: { serie: { anio: number; twh: number; tipo: string }[]; banda: [number, number] }) {
-  const W = 560, H = 170, P = { t: 10, r: 10, b: 22, l: 40 };
   const maxY = Math.max(banda[1], ...serie.map((s) => s.twh)) * 1.05;
-  const x = (anio: number) => P.l + ((anio - 2020) / (2035 - 2020)) * (W - P.l - P.r);
-  const y = (twh: number) => H - P.b - (twh / maxY) * (H - P.t - P.b);
-  const d = serie.map((s, i) => `${i === 0 ? "M" : "L"}${x(s.anio).toFixed(1)},${y(s.twh).toFixed(1)}`).join(" ");
+  const datos = serie.map((s) => ({
+    anio: s.anio,
+    historico: s.anio <= 2030 ? s.twh : null,
+    proyectado: s.anio >= 2030 ? s.twh : null,
+  }));
 
   return (
-    <div className="overflow-x-auto">
-      <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full min-w-[420px]" role="img"
-        aria-label={`Consumo mundial de centros de datos de 2020 a 2035, terminando en ${Math.round(serie[serie.length - 1].twh)} TWh`}>
-        <rect x={x(2035) - 6} y={y(banda[1])} width={12} height={Math.max(0, y(banda[0]) - y(banda[1]))}
-          fill="var(--azul)" opacity={0.18} />
-        {[0, maxY / 2, maxY].map((v) => (
-          <g key={v}>
-            <line x1={P.l} x2={W - P.r} y1={y(v)} y2={y(v)} stroke="var(--linea)" strokeWidth={1} />
-            <text x={P.l - 6} y={y(v) + 3} textAnchor="end" fontSize={9} fill="var(--ink-3)" fontFamily="var(--font-mono)">
-              {Math.round(v)}
-            </text>
-          </g>
-        ))}
-        <path d={d} fill="none" stroke="var(--azul)" strokeWidth={2} />
-        {serie.filter((s) => [2020, 2023, 2024, 2030, 2035].includes(s.anio)).map((s) => (
-          <g key={s.anio}>
-            <rect x={x(s.anio) - 3} y={y(s.twh) - 3} width={6} height={6}
-              fill={s.anio === 2035 ? "var(--paper)" : "var(--azul)"} stroke="var(--azul)" strokeWidth={1.5} />
-            <text x={x(s.anio)} y={H - 8} textAnchor="middle" fontSize={9} fill="var(--ink-3)" fontFamily="var(--font-mono)">
-              {s.anio}
-            </text>
-          </g>
-        ))}
-      </svg>
+    <div className="overflow-x-auto" role="img"
+      aria-label={`Consumo mundial de centros de datos de 2020 a 2035, terminando en ${Math.round(serie[serie.length - 1].twh)} TWh`}>
+      <div className="h-[190px] w-full min-w-[420px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart data={datos} margin={{ top: 10, right: 12, bottom: 4, left: 0 }}>
+            <CartesianGrid vertical={false} stroke="var(--linea)" />
+            <XAxis dataKey="anio" type="number" domain={[2020, 2035]} ticks={ANIOS_ANCLA}
+              tickFormatter={(v) => String(v)} tick={{ fontSize: 9, fill: "var(--ink-3)", fontFamily: "var(--font-mono)" }}
+              axisLine={{ stroke: "var(--linea)" }} tickLine={false} />
+            <YAxis domain={[0, maxY]} ticks={[0, maxY / 2, maxY]} tickFormatter={(v) => String(Math.round(v))}
+              tick={{ fontSize: 9, fill: "var(--ink-3)", fontFamily: "var(--font-mono)" }} width={34}
+              axisLine={false} tickLine={false} />
+            <ReferenceArea x1={2034.6} x2={2035} y1={banda[0]} y2={banda[1]} fill="var(--azul)" fillOpacity={0.18} stroke="none" />
+            <Line dataKey="historico" stroke="var(--azul)" strokeWidth={2} dot={MarcadorAncla} isAnimationActive={false} connectNulls={false} />
+            <Line dataKey="proyectado" stroke="var(--azul)" strokeWidth={2} strokeDasharray="4 3" dot={MarcadorAncla} isAnimationActive={false} connectNulls={false} />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
