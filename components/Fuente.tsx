@@ -135,7 +135,7 @@ function CuerpoFicha({ f, onCerrar }: { f: Ficha; onCerrar: () => void }) {
           <Fila k="Cobertura">{f.cobertura}</Fila>
           <Fila k="Periodo">{f.periodo}</Fila>
           <Fila k="Dónde aparece">{f.dondeAparece}</Fila>
-          <Fila k="Verificó">{f.verificadoPor} · {f.verificadoEl}</Fila>
+          <Fila k="Verificado el">{f.verificadoEl}</Fila>
         </dl>
 
         {f.nota && (
@@ -144,17 +144,23 @@ function CuerpoFicha({ f, onCerrar }: { f: Ficha; onCerrar: () => void }) {
       </div>
 
       <div className="border-t border-linea px-5 py-3">
-        <a
-          href={f.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-[36px] items-center gap-2 font-mono text-[12px] underline underline-offset-4 transition-colors duration-150 hover:text-ink-2 focus-visible:outline-2"
-        >
-          Abrir la fuente original
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
-            <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </a>
+        {f.url ? (
+          <a
+            href={f.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[36px] items-center gap-2 font-mono text-[12px] underline underline-offset-4 transition-colors duration-150 hover:text-ink-2 focus-visible:outline-2"
+          >
+            Abrir la fuente original
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+              <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </a>
+        ) : (
+          <p className="min-h-[36px] py-2 font-mono text-[12px] text-ink-3">
+            Sin enlace directo — {f.fuente}, {f.documento ?? "ver arriba"}.
+          </p>
+        )}
       </div>
     </div>
   );

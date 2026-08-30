@@ -56,6 +56,7 @@
     "nivel": "derivado de nivel A",
     "fuente": "cálculo propio sobre IEA/PNUD Table 2",
     "documento": "cociente de los dos paneles de Table 2",
+    "url": "https://www.undp.org/publications/energy-sprint-ai-race",
     "cobertura": "mundial y por región",
     "periodo": "2020-2030",
     "verificadoPor": "Jean",
@@ -69,6 +70,7 @@
     "unidad": "TWh de diferencia entre el total mundial declarado y la suma de las regiones listadas",
     "nivel": "derivado de nivel A",
     "fuente": "cálculo propio sobre IEA/PNUD Table 2",
+    "url": "https://www.undp.org/publications/energy-sprint-ai-race",
     "verificadoPor": "Jean",
     "verificadoEl": "2026-08-25",
     "nota": "Residual consistente de 1,0-1,5 % en los dos paneles. Las regiones listadas (Norteamérica, Centro y Suramérica, Europa, África, Medio Oriente, Asia-Pacífico) no cubren el mundo: falta al menos Eurasia. NO es error del cuaderno del curso — está en la tabla original de la IEA. Si reproducimos la tabla hay que declarar el residual."
@@ -129,6 +131,7 @@
     "nivel": "A",
     "fuente": "PNUD y Centro TIDE (Oxford)",
     "documento": "The Energy Sprint of the AI Race, pág. 28 (fuente subyacente: Lee et al. 2025)",
+    "url": "https://www.undp.org/publications/energy-sprint-ai-race",
     "verificadoPor": "Jean",
     "verificadoEl": "2026-08-25",
     "dondeAparece": "página 28: «A typical 100-megawatt facility generates around 500 full-time equivalent jobs during its two- to three-year construction period and maintains a specialized operational workforce of roughly 50»",
@@ -141,6 +144,7 @@
     "nivel": "A",
     "fuente": "PNUD y Centro TIDE (Oxford)",
     "documento": "The Energy Sprint of the AI Race, pág. 7",
+    "url": "https://www.undp.org/publications/energy-sprint-ai-race",
     "verificadoPor": "Jean",
     "verificadoEl": "2026-08-25",
     "dondeAparece": "página 7: «Nearly 730 million people are projected to remain without power by 2030»"
@@ -152,6 +156,7 @@
     "nivel": "B",
     "fuente": "PNUD y Centro TIDE (Oxford)",
     "documento": "The Energy Sprint of the AI Race, pág. 4",
+    "url": "https://www.undp.org/publications/energy-sprint-ai-race",
     "verificadoPor": "Jean",
     "verificadoEl": "2026-08-25",
     "dondeAparece": "página 4: «AI is projected to add US$15.7 trillion to global output by 2030, yet less than 10 percent of this value is expected to accrue to developing economies»"
@@ -230,6 +235,7 @@
     "nivel": "derivado de nivel A",
     "fuente": "cálculo propio sobre dos series de XM",
     "documento": "ENFICC por Sistema (89,38 TWh) menos demanda DemaSIN (84,05 TWh), ambas 2025",
+    "url": "https://servapibi.xm.com.co/daily",
     "cobertura": "Colombia",
     "periodo": "2025",
     "verificadoPor": "Jean",
@@ -260,6 +266,7 @@
     "nivel": "A",
     "fuente": "Lawrence Berkeley National Laboratory",
     "documento": "2024 U.S. Data Center Energy Usage Report, pág. 47",
+    "url": "https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report_1.pdf",
     "cobertura": "EE. UU.",
     "dondeAparece": "pág. 47: «The resulting annual average PUE falls from 1.6 in 2014 to 1.4 in 2023» y «by 2028, the average PUE falls to between 1.15 and 1.35»",
     "nota": "Cobertura EE. UU., no mundial — hay que declararlo. Para lo mundial tenemos el PUE derivado de la Table 2 del PNUD."
@@ -274,6 +281,7 @@
     "nivel": "A",
     "fuente": "Lawrence Berkeley National Laboratory",
     "documento": "2024 U.S. Data Center Energy Usage Report, pág. 27 — Server Operational Time",
+    "url": "https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report_1.pdf",
     "cobertura": "EE. UU.",
     "dondeAparece": "pág. 27, cita textual de los seis valores",
     "nota": "BONUS en la misma página: los servidores de IA entrenando se asumen a 80 % de tiempo operativo constante y sirviendo a 40 %. Y en la pág. 24: «we parameterized inference-related power demand as half of that during training». Es lo más cerca que hay de un reparto entrenar/servir, y confirma por qué el hueco se declara: son tiempos de operación supuestos, no un reparto de energía."
@@ -332,6 +340,7 @@
     "unidad": "definición de la métrica",
     "fuente": "Lawrence Berkeley National Laboratory",
     "documento": "2024 U.S. Data Center Energy Usage Report, pág. 39",
+    "url": "https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report_1.pdf",
     "dondeAparece": "pág. 39: «Water Usage Effectiveness is similarly defined as the total water consumption of the data center divided by the electricity demand of the IT equipment»",
     "nota": "CRÍTICO PARA EL MODELO: el denominador es el kWh de TI, no el del medidor. Aplicar el WUE al consumo del medidor sobreestima el agua en un factor igual al PUE. La misma página distingue WUE (site) —agua directa de refrigeración— de WUE (source) —agua consumida al generar la electricidad—. Nuestro tablero calcula la directa."
   },
@@ -345,6 +354,7 @@
     "unidad": "WUE (site) promedio anual del parque estadounidense",
     "fuente": "Lawrence Berkeley National Laboratory",
     "documento": "2024 U.S. Data Center Energy Usage Report, pág. 48, fig. 4.7",
+    "url": "https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report_1.pdf",
     "cobertura": "EE. UU.",
     "dondeAparece": "pág. 48: «stays just over 0.36 L/kWh through 2023. After 2023, the average WUE rises slightly, reaching between 0.45 and 0.48 L/kWh»",
     "nota": "Sube por el giro hacia hiperescala y colocación y por los sistemas refrigerados por líquido. El propio informe advierte (pág. 47) que su simulación puede subestimar el WUE del enfriamiento adiabático: instalaciones hiperescala reportan 0,1-0,3 L/kWh para sistemas similares, y con una mediana de 0,2 el agregado de hiperescala subiría de 0,32 a 0,40."
@@ -359,6 +369,7 @@
     "unidad": "WUE regional",
     "fuente": "AIE, reproducido por PNUD y Centro TIDE (Oxford)",
     "documento": "The Energy Sprint of the AI Race, pág. 27 (fuente subyacente: IEA 2025a)",
+    "url": "https://www.undp.org/publications/energy-sprint-ai-race",
     "cobertura": "regional",
     "dondeAparece": "pág. 27: «in Asia and the Pacific, the regional water-use effectiveness rate is 1.65 litres per kilowatt-hour, over three times the global average of 0.5 litres per kilowatt-hour»",
     "nota": "La misma página dice que para 2030 cerca de la MITAD del consumo mundial de agua de centros de datos ocurrirá en Asia-Pacífico, «where warm, humid conditions make cooling more water-intensive». Y pone el argumento del trópico por escrito: la energía renovable baja la intensidad de carbono y agua frente a los fósiles, pero las temperaturas altas y la escasez hídrica suben la demanda de refrigeración. La figura de esa página distingue EXTRACCIÓN de CONSUMO de agua — son cosas distintas y se intercambian a conveniencia."
@@ -388,6 +399,7 @@
     "unidad": "intensidad hídrica de la electricidad consumida",
     "fuente": "Lawrence Berkeley National Laboratory",
     "documento": "2024 U.S. Data Center Energy Usage Report, pág. 57",
+    "url": "https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report_1.pdf",
     "cobertura": "EE. UU.",
     "periodo": "2023",
     "dondeAparece": "pág. 57: «energy consumption by a data center translates to national average of 4.52 L/kWh of indirect water consumption». En la misma página: el agua indirecta total de los centros de datos de EE. UU. ronda 800 mil millones de litros",
