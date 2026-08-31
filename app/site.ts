@@ -1,5 +1,5 @@
 // Único lugar donde se editan título e integrantes.
-export const TITULO = "Cuántas Colombias";
+export const TITULO = "Amarrados a la Electricidad";
 export const SUBTITULO = "Tablero de consumo energético del cómputo";
 
 export const INTEGRANTES = [
