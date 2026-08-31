@@ -122,6 +122,12 @@ export default function Home() {
           <h1 className="mt-3 max-w-[16ch] text-portada font-semibold tracking-tight">{TITULO}</h1>
           <p className="mt-3 max-w-[52ch] text-mayor text-ink-2">{SUBTITULO}</p>
 
+          <p className="mt-4 max-w-[60ch] border-l-2 pl-3 text-menor leading-relaxed text-ink-2"
+            style={{ borderColor: "var(--azul)" }}>
+            <span className="font-mono text-nota uppercase tracking-[.15em] text-ink-3">Tesis — </span>
+            Colombia no puede alojar la próxima ola de centros de datos sin medirla primero.
+          </p>
+
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <ul className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-menor text-ink-3">
               {INTEGRANTES.map((x) => <li key={x}>{x}</li>)}
