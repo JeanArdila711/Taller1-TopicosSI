@@ -522,6 +522,40 @@ export default function Home() {
             </div>
           </section>
 
+          {/* ══════════ CIERRE ══════════ */}
+          <section id="cierre" className="mt-16 border-t-2 border-ink pt-10">
+            <span className="inline-block px-2 py-[3px] font-mono text-nota uppercase tracking-[.15em]"
+              style={{ background: "var(--ink)", color: "var(--paper)" }}>
+              Cierre
+            </span>
+            <p className="mt-4 max-w-[30ch] text-portada font-semibold leading-[1.05] tracking-tight">
+              El mundo va a competir por energía firme antes que por cómputo.
+            </p>
+            <p className="mt-2 max-w-[30ch] text-portada font-semibold leading-[1.05] tracking-tight">
+              Colombia tiene la ventaja — todavía no tiene el instrumento para usarla.
+            </p>
+            <div className="mt-6 max-w-[62ch] font-mono text-menor leading-relaxed text-ink-2">
+              <p>
+                Hoy hay <strong className="text-ink">25 centros de datos en operación y 9 en desarrollo</strong>
+                <Cita ids={["acoldc_colombia_dc_2026"]} />, y ningún conteo oficial de cuántos megavatios ya
+                están instalados: el único registro público, el de la UPME, es de inscripción voluntaria y
+                mide proyectos de generación, no lo que consume un centro de datos
+                <Cita ids={["upme_registro_proyectos"]} />.
+              </p>
+              <p className="mt-3">
+                La ventaja existe de todas formas: la red colombiana emite 2,8 veces menos que la de
+                Virginia por kWh<Cita ids={["xm_factor_emision_2025", "egrid_virginia_2023"]} />. Y ya
+                pesa: un solo centro de 100 MW, en condiciones típicas de operación, se lleva el 9,3 % del
+                margen de energía firme del país<Cita ids={["margen_energia_firme_2025", "xm_enficc_2025"]} />;
+                tres centros de ese tamaño se acercan al 28 %, y nadie está sumando esa cuenta.
+              </p>
+              <p className="mt-3">
+                La pregunta que deja este tablero no es si Colombia debería alojar esta carga. Es bajo qué
+                condiciones le conviene al país recibirla, y quién debería poder ponerlas.
+              </p>
+            </div>
+          </section>
+
         </main>
 
         <footer className="border-t border-linea py-8 font-mono text-nota leading-relaxed text-ink-3">
